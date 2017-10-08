@@ -48,7 +48,7 @@ potPlot<-function(dtvec, cutoff)
   plot(dtvec_ordered,pot_est)
 }
 # Test: using IBM data to test functions to construct Hill and POT plots 
-ibm<-read.csv(file='C:\\Users\\zil20\\Desktop\\Github Repos\\MSCFRiskManagement1\\wk3\\ibm091716.csv',header=TRUE)
+ibm<-read.csv(file='C:\\Users\\zil20\\Desktop\\Github Repos\\MSCFRiskManagement1\\ibm091716.csv',header=TRUE)
 ibm_ret<-ibm$return
 hillPlot(ibm_ret,1000)
 potPlot(ibm_ret,10000)
