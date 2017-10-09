@@ -155,39 +155,7 @@ for (i in 1:NN)
 
 # part c
 ddtimes<-matrix(0, nrow=NN, ncol=paths)
-# Function to perform bisection method to find root
-bisectRoot<-function (f, a, b, num = 10, eps = 1e-05) 
-{
-  result<-0
-  h = abs(b - a)/num
-  i = 0
-  a1 = b1 = 0
-  while (i <= num) {
-    a1 = a + i * h
-    b1 = a1 + h
-    if (f(a1) == 0) {
-      j=j+1
-      result<-a1
-    }
-    else if (f(b1) == 0) {
-      result<-b1
-    }
-    else if (f(a1) * f(b1) < 0) {
-      repeat {
-        if (abs(b1 - a1) < eps) 
-          break
-        x <- (a1 + b1)/2
-        if (f(a1) * f(x) < 0) 
-          b1 <- x
-        else a1 <- x
-      }
-      result<-(a1+b1)/2
-    }
-    i = i + 1
-  }
-  print('use')
-  return(result)
-}
+pv<-matrix<-matrix(0, nrow=NN, ncol=paths)
 # main loop to find default time
 for (i in 1:NN)
 {
@@ -195,11 +163,11 @@ for (i in 1:NN)
   {
     lt<-0
     rt<-0
-    bound<--log(runif(1))
+    bound<-(-log(runif(1)))
     lc<-0
     rc<-0
     cur_state<-i
-    while (rt<maturity & lc < bound & cur_state != 8)
+    while (rt<maturity & rc < bound)
     {
       time<-(-1/hld_lam[cur_state])*log(runif(1))
       lt<-rt
@@ -212,19 +180,39 @@ for (i in 1:NN)
       Y=(W<=AT[(cur_state-1)*NN+I, 1])
       YN=Y+0
       cur_state=AT[(cur_state-1)*NN+I, 2]*YN+AT[(cur_state-1)*NN+I, 3]*(1-YN)
+      if (cur_state==8)
+      {
+        break
+      }
     }
+    
     if (cur_state == 8) 
     {
       ddtimes[i,j]<-min(maturity, rt)
-    }
-    else
+    } else
     {
-      func<-function(x)
-      {
-        (rc-lc)*x/(rt-lt)-bound
-      }
-      ddtimes[i,j] <- bisectRoot(func, lt, rt)
+      ddtimes[i,j]<-min(maturity,lt+(bound-lc)*(rt-lt)/(rc-lc))
     }
   }
 }
+bondprc<-numeric(NN)
+bondse<-numeric(NN)
+for (i in 1:NN)
+{
+  for (j in 1:paths)
+  {
+    if (ddtimes[i,j]<maturity) 
+    {
+      pv[i,j]<-recovery*exp(-rf*ddtimes[i,j])
+    } else {
+      pv[i,j]<-exp(-rf*ddtimes[i,j])
+    }
+  }
+  bondprc[i]=mean(pv[i,])
+  bondse[i]=sd(pv[i,])/sqrt(paths)
+}
+bondprc
+bondse
+
+
 
