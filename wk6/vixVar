@@ -1,0 +1,52 @@
+# Functions needed for VaR calculation
+calcVarAndShortfallFromLossVector<-function(loss_vec, alp)
+{
+  loss_ordered=sort(loss_vec)
+  n=length(loss_vec)
+  var_pick=ceiling(n*alp)
+  var=loss_ordered[var_pick]
+  sf=mean(loss_ordered[var_pick:n])
+  return(cbind(alp, var, sf))
+}
+# Getting the date
+library(quantmod)
+vix<-as.data.frame(Ad(getSymbols('^VIX',from='2007-11-30',to='2015-11-30',auto.assign=FALSE)))
+length(vix$VIX.Adjusted)
+# Check missing values
+count<-0
+for (i in 1:length(vix))
+{
+  if (is.na(vix$VIX.Adjusted[i]==TRUE))
+  {
+    count<-count+1
+  }
+}
+count
+# Parameters
+vega<-(-150)
+vixloss<-numeric(length(vix$VIX.Adjusted)-11)
+# There is no missing values
+for (i in 1:(length(vix$VIX.Adjusted)-11))
+{
+  vixloss[i]<-(-vega*(vix$VIX.Adjusted[i+10]/vix$VIX.Adjusted[i]-1)/0.1)
+}
+# Calculate empirical 10 day VaR
+var1<-calcVarAndShortfallFromLossVector(vixloss,0.95)
+var1<-var1[2]
+var1
+# Empirical 10-day VaR is 543 mm
+hist(vixloss, main='Distribution of VIX Loss')
+# Calculate 10-day VaR assuming log-normally distributed 
+var2<-mean(vixloss)+qnorm(0.95)*sd(vixloss)
+var2
+# 10-day VaR assuming normal distributed loss is 523 mm
+sixmvar1<-sqrt(130)*var1/sqrt(10)
+sixmvar2<-sqrt(130)*var2/sqrt(10)
+sixmvar1
+sixmvar2
+# 6-month VaR from empirical is 1959 mm. 6-month VaR from assumed normal is 1887 mm. 
+# Calculate portfolio loss from 2008-06-30 to 2008-12-31
+loss2008<-(-vega*(vix[c('2008-12-31'),]/vix[c('2008-06-30'),]-1)/0.1)
+loss2008
+# The loss in the period is 1005 mm, which does not exceed either 6-month VaR computed in part (ii)
+
